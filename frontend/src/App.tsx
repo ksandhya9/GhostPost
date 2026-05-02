@@ -4,6 +4,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import axios from 'axios';
 import { Sparkles, LayoutDashboard, Settings, Plus, History, Zap, Palette, Layers, ChevronDown, ArrowUp, Link2, FileText, Octagon, BarChart3, RotateCcw, Eye } from 'lucide-react';
 import OutputDisplay from './components/OutputDisplay';
+import GuidedWorkflow from './components/guided/GuidedWorkflow';
 import Newsroom from './components/Newsroom';
 import SettingsView from './components/Settings';
 import Sessions from './components/Sessions';
@@ -30,7 +31,7 @@ function AppContent() {
     const [showToneMenu, setShowToneMenu] = useState(false);
     const [showModeMenu, setShowModeMenu] = useState(false);
     const [showInputTypeMenu, setShowInputTypeMenu] = useState(false);
-    const [activeView, setActiveView] = useState<'enhance' | 'sessions' | 'pipelines' | 'settings' | 'admin' | 'watchlist'>('enhance');
+    const [activeView, setActiveView] = useState<'enhance' | 'sessions' | 'pipelines' | 'settings' | 'admin' | 'watchlist' | 'guided'>('enhance');
     
     const [userName, setUserName] = useState('Ghost Writer');
     const enhanceMutation = useEnhance();
@@ -185,6 +186,13 @@ function AppContent() {
                             Ghost Post
                         </button>
                         <button 
+                            onClick={() => setActiveView('guided')}
+                            className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-r-[3px] text-[var(--text-sm)] transition-all font-light ${activeView === 'guided' ? 'bg-[var(--plasma-dim)] text-[var(--plasma)] border-l-2 border-[var(--plasma)]' : 'text-[var(--text-2)] hover:text-[var(--text-1)] hover:bg-white/[0.03]'}`}
+                        >
+                            <Sparkles size={14} />
+                            Guided Workflow
+                        </button>
+                        <button 
                             onClick={() => setActiveView('watchlist')}
                             className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-[3px] text-[var(--text-sm)] transition-all font-light ${activeView === 'watchlist' ? 'bg-[var(--plasma-dim)] text-[var(--plasma)] border-l-2 border-[var(--plasma)]' : 'text-[var(--text-2)] hover:text-[var(--text-1)] hover:bg-white/[0.03]'}`}
                         >
@@ -254,6 +262,10 @@ function AppContent() {
                         <AdminDashboard />
                     ) : activeView === 'watchlist' ? (
                         <Watchlist />
+                    ) : activeView === 'guided' ? (
+                        <div className="flex-1 overflow-y-auto bg-[#f0f2f5]">
+                            <GuidedWorkflow />
+                        </div>
                     ) : (
                         <>
                             {/* TOPBAR */}

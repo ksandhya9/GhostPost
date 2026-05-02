@@ -1,6 +1,9 @@
 import logger from '../utils/logger';
 import { AgentOrchestrator } from './orchestrator.service';
 import { extractAndParseJson } from '../utils/json.util';
+import * as guidedPrompts from '../config/prompts.guided';
+import axios from 'axios';
+import config from '../config';
 
 const orchestrator = new AgentOrchestrator();
 
@@ -110,4 +113,57 @@ export const generateHook = async (text: string, tone: string, hookTip: string):
     });
 
     return result.finalContent;
+};
+
+/**
+ * Stage 1: Generate guided structure (hooks, angle, etc)
+ */
+export const generateGuidedStructure = async (options: guidedPrompts.GuidedStructureOptions) => {
+    const prompt = guidedPrompts.generateStructurePrompt(options);
+    
+    const response = await axios.post(config.drafting.url, {
+        model: config.drafting.model,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1000
+    }, {
+        headers: { 'Authorization': `Bearer ${config.drafting.apiKey}` }
+    });
+
+    const content = response.data.choices[0].message.content;
+    return extractAndParseJson(content);
+};
+
+/**
+ * Stage 2: Generate refined guided post
+ */
+export const generateGuidedPost = async (options: guidedPrompts.GuidedPostOptions) => {
+    const prompt = guidedPrompts.generatePostPrompt(options);
+    
+    const response = await axios.post(config.drafting.url, {
+        model: config.drafting.model,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1000
+    }, {
+        headers: { 'Authorization': `Bearer ${config.drafting.apiKey}` }
+    });
+
+    return response.data.choices[0].message.content;
+};
+
+/**
+ * Stage 3: Generate post variations
+ */
+export const generateGuidedVariations = async (originalPost: string) => {
+    const prompt = guidedPrompts.generateVariationsPrompt(originalPost);
+    
+    const response = await axios.post(config.drafting.url, {
+        model: config.drafting.model,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1500
+    }, {
+        headers: { 'Authorization': `Bearer ${config.drafting.apiKey}` }
+    });
+
+    const content = response.data.choices[0].message.content;
+    return extractAndParseJson(content);
 };

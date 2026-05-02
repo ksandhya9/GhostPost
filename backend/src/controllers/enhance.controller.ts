@@ -121,3 +121,61 @@ export const generateHook = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message || 'Internal server error' });
     }
 };
+
+// --- Guided Workflow Handlers ---
+
+const guidedStructureSchema = z.object({
+    intent: z.string(),
+    messyIdea: z.string().min(10),
+    targetAudience: z.string().optional(),
+    desiredTone: z.string().optional(),
+    avoidList: z.array(z.string()).optional()
+});
+
+export const generateGuidedStructure = async (req: Request, res: Response) => {
+    try {
+        const options = guidedStructureSchema.parse(req.body);
+        const result = await llmService.generateGuidedStructure(options);
+        res.status(200).json(result);
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: 'Validation error', details: error.issues });
+        }
+        logger.error({ error }, 'Error generating guided structure');
+        res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+};
+
+const guidedPostSchema = guidedStructureSchema.extend({
+    selectedHook: z.string(),
+    selectedStructure: z.string(),
+    userStyleProfile: z.string().optional()
+});
+
+export const generateGuidedPost = async (req: Request, res: Response) => {
+    try {
+        const options = guidedPostSchema.parse(req.body);
+        const refinedPost = await llmService.generateGuidedPost(options);
+        res.status(200).json({ refinedPost });
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: 'Validation error', details: error.issues });
+        }
+        logger.error({ error }, 'Error generating guided post');
+        res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+};
+
+export const generateGuidedVariations = async (req: Request, res: Response) => {
+    try {
+        const { originalPost } = z.object({ originalPost: z.string() }).parse(req.body);
+        const variations = await llmService.generateGuidedVariations(originalPost);
+        res.status(200).json(variations);
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: 'Validation error', details: error.issues });
+        }
+        logger.error({ error }, 'Error generating guided variations');
+        res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+};

@@ -97,14 +97,14 @@ const draftingApiKey = resolveKey(process.env.DRAFTING_API_KEY);
 const validationApiKey = resolveKey(process.env.VALIDATION_API_KEY);
 const refinementApiKey = resolveKey(process.env.REFINEMENT_API_KEY);
 
-const AI_BAN_LIST = [
+export const AI_BAN_LIST = [
     "Furthermore", "Moreover", "In conclusion", "Additionally", 
     "In today's fast-paced world", "Unlock the potential", "It's important to note", 
     "In the digital age", "Navigate the landscape", "Game changer", 
     "Harness the power", "Testament to", "fast-paced", "cutting-edge", "game-changing", "ever-evolving"
 ];
 
-const HUMAN_GUIDELINES = `
+export const HUMAN_GUIDELINES = `
 HUMAN-LIKE WRITING GUIDELINES:
 1. BURSTINESS: Vary your sentence length significantly. Use short, punchy sentences (3-7 words) followed by longer, more complex ones (15-25 words). This creates a natural human rhythm.
 2. AI-ISM BAN LIST: DO NOT use the following words or phrases: ${AI_BAN_LIST.join(', ')}.
