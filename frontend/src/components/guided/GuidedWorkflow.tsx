@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    ChevronLeft, 
-    ArrowRight, 
-    Sparkles, 
-    MessageSquare, 
-    BookOpen, 
-    Zap, 
-    Award, 
+import {
+    ChevronLeft,
+    ArrowRight,
+    Sparkles,
+    MessageSquare,
+    BookOpen,
+    Zap,
+    Award,
     Megaphone,
     Copy,
     RefreshCw,
@@ -87,11 +87,11 @@ export default function GuidedWorkflow() {
         setSelectedHook(hook);
         setLoading(true);
         try {
-            const res = await axios.post('/api/enhance/guided/post', { 
-                intent, 
-                messyIdea, 
+            const res = await axios.post('/api/enhance/guided/post', {
+                intent,
+                messyIdea,
                 selectedHook: hook,
-                selectedStructure: structureData.structure 
+                selectedStructure: structureData.structure
             });
             setRefinedPost(res.data.refinedPost);
             nextStep();
@@ -125,8 +125,8 @@ export default function GuidedWorkflow() {
         switch (step) {
             case 1:
                 return (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10 }} 
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
@@ -154,8 +154,8 @@ export default function GuidedWorkflow() {
                 );
             case 2:
                 return (
-                    <motion.div 
-                        initial={{ opacity: 0, x: 20 }} 
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="space-y-6"
                     >
@@ -173,7 +173,7 @@ export default function GuidedWorkflow() {
                             <button onClick={prevStep} className="flex items-center gap-2 text-[#4a6b8c] hover:text-[#b86b3e] transition-all">
                                 <ChevronLeft size={18} /> Back
                             </button>
-                            <button 
+                            <button
                                 onClick={handleGenerateStructure}
                                 disabled={loading || messyIdea.length < 10}
                                 className="flex items-center gap-2 px-6 py-2 bg-[#b86b3e] text-white rounded-full hover:bg-[#a05a30] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -185,8 +185,8 @@ export default function GuidedWorkflow() {
                 );
             case 3:
                 return (
-                    <motion.div 
-                        initial={{ opacity: 0, x: 20 }} 
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="space-y-6"
                     >
@@ -220,8 +220,8 @@ export default function GuidedWorkflow() {
                 );
             case 4:
                 return (
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }} 
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="space-y-6"
                     >
@@ -235,7 +235,7 @@ export default function GuidedWorkflow() {
                                 onChange={(e) => setRefinedPost(e.target.value)}
                                 className="w-full h-[400px] p-6 bg-white border border-[#4a6b8c]/20 rounded-lg shadow-sm font-sans text-[#1a1a1a] leading-relaxed focus:outline-none"
                             />
-                            <button 
+                            <button
                                 onClick={() => copyToClipboard(refinedPost)}
                                 className="absolute top-4 right-4 p-2 bg-[#f0f2f5] hover:bg-[#e4e6e9] rounded-md transition-all text-[#4a6b8c]"
                                 title="Copy to clipboard"
@@ -247,7 +247,7 @@ export default function GuidedWorkflow() {
                             <button onClick={prevStep} className="flex items-center gap-2 text-[#4a6b8c] hover:text-[#b86b3e] transition-all">
                                 <ChevronLeft size={18} /> Back
                             </button>
-                            <button 
+                            <button
                                 onClick={handleGenerateVariations}
                                 className="px-6 py-2 bg-[#b86b3e] text-white rounded-full hover:bg-[#a05a30] transition-all"
                             >
@@ -258,8 +258,8 @@ export default function GuidedWorkflow() {
                 );
             case 5:
                 return (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }} 
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
@@ -272,7 +272,7 @@ export default function GuidedWorkflow() {
                                 <div key={key} className="p-4 bg-white/60 border border-[#4a6b8c]/10 rounded-lg space-y-3">
                                     <h4 className="text-xs font-bold uppercase tracking-widest text-[#b86b3e]">{key}</h4>
                                     <p className="text-sm text-[#1a1a1a] line-clamp-4">{value}</p>
-                                    <button 
+                                    <button
                                         onClick={() => { setRefinedPost(value); nextStep(); }}
                                         className="text-xs text-[#4a6b8c] hover:text-[#b86b3e] font-semibold"
                                     >
@@ -288,8 +288,8 @@ export default function GuidedWorkflow() {
                 );
             case 6:
                 return (
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }} 
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="space-y-6"
                     >
@@ -301,7 +301,7 @@ export default function GuidedWorkflow() {
                             <div className="prose prose-slate max-w-none text-[#1a1a1a] whitespace-pre-wrap">
                                 {refinedPost}
                             </div>
-                            <button 
+                            <button
                                 onClick={() => copyToClipboard(refinedPost)}
                                 className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 bg-[#b86b3e] text-white rounded-md hover:bg-[#a05a30] transition-all"
                             >
@@ -310,7 +310,7 @@ export default function GuidedWorkflow() {
                             </button>
                         </div>
                         <div className="flex justify-center gap-4">
-                            <button 
+                            <button
                                 onClick={() => setStep(1)}
                                 className="px-6 py-2 border border-[#b86b3e] text-[#b86b3e] rounded-full hover:bg-[#b86b3e]/5 transition-all"
                             >
@@ -336,8 +336,8 @@ export default function GuidedWorkflow() {
                         <div key={s} className="flex flex-col items-center gap-2 bg-[#f0f2f5] px-2">
                             <div className={cn(
                                 "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300",
-                                current ? "bg-[#b86b3e] text-white scale-110 shadow-lg" : 
-                                completed ? "bg-[#b86b3e]/20 text-[#b86b3e]" : "bg-white border border-[#4a6b8c]/20 text-[#4a6b8c]"
+                                current ? "bg-[#b86b3e] text-white scale-110 shadow-lg" :
+                                    completed ? "bg-[#b86b3e]/20 text-[#b86b3e]" : "bg-white border border-[#4a6b8c]/20 text-[#4a6b8c]"
                             )}>
                                 {completed ? <Check size={14} /> : idx + 1}
                             </div>

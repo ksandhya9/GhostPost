@@ -4,58 +4,62 @@ import {
     generateVariationsPrompt 
 } from '../prompts.guided';
 
-describe('Guided Prompt Builders', () => {
+describe('Guided Prompt Builders (P0 & P1)', () => {
     const mockOptions = {
         intent: 'share a lesson',
-        messyIdea: 'I learned that testing is hard but worth it.',
+        messyIdea: 'Testing is hard but worth it.',
         targetAudience: 'junior developers',
         desiredTone: 'encouraging',
-        avoidList: ['corporate fluff', 'jargon']
+        avoidList: ['corporate fluff']
     };
 
-    describe('generateStructurePrompt', () => {
-        it('should include the intent and messy idea in the prompt', () => {
+    describe('generateStructurePrompt (P0)', () => {
+        it('should include the strategic intent and messy idea', () => {
             const prompt = generateStructurePrompt(mockOptions);
             expect(prompt).toContain('share a lesson');
-            expect(prompt).toContain('I learned that testing is hard but worth it.');
+            expect(prompt).toContain('Testing is hard but worth it.');
+        });
+
+        it('should mandate a JSON output with hooks, angle, and structure', () => {
+            const prompt = generateStructurePrompt(mockOptions);
+            expect(prompt).toContain('OUTPUT FORMAT (MANDATORY JSON)');
+            expect(prompt).toContain('"hooks":');
+            expect(prompt).toContain('"angle":');
+            expect(prompt).toContain('"structure":');
         });
 
         it('should include human-like writing guidelines', () => {
             const prompt = generateStructurePrompt(mockOptions);
             expect(prompt).toContain('HUMAN-LIKE WRITING GUIDELINES');
         });
-
-        it('should specify the output format for hooks and angles', () => {
-            const prompt = generateStructurePrompt(mockOptions);
-            expect(prompt).toContain('[HOOK 1]');
-            expect(prompt).toContain('[HOOK 2]');
-            expect(prompt).toContain('[HOOK 3]');
-            expect(prompt).toContain('[ANGLE]');
-        });
     });
 
-    describe('generatePostPrompt', () => {
+    describe('generatePostPrompt (P0)', () => {
         const postOptions = {
             ...mockOptions,
-            selectedHook: 'Testing is the secret sauce.',
+            selectedHook: 'The secret to good code is testing.',
             selectedStructure: 'Problem-Agitation-Solution'
         };
 
-        it('should incorporate the selected hook and structure', () => {
+        it('should incorporate the user-selected hook exactly', () => {
             const prompt = generatePostPrompt(postOptions);
-            expect(prompt).toContain('Testing is the secret sauce.');
-            expect(prompt).toContain('Problem-Agitation-Solution');
+            expect(prompt).toContain('The secret to good code is testing.');
         });
 
-        it('should enforce the 300-word limit rule', () => {
+        it('should enforce the platform-specific word limit', () => {
             const prompt = generatePostPrompt(postOptions);
             expect(prompt).toContain('300 words or less');
         });
+
+        it('should include the AI ban list', () => {
+            const prompt = generatePostPrompt(postOptions);
+            expect(prompt).toContain('AI-ISM BAN LIST');
+        });
     });
 
-    describe('generateVariationsPrompt', () => {
-        it('should request exactly 5 variants', () => {
-            const prompt = generateVariationsPrompt('Original post content');
+    describe('generateVariationsPrompt (P1)', () => {
+        it('should request the 5 mandatory variation types', () => {
+            const prompt = generateVariationsPrompt('Original post');
             expect(prompt).toContain('Short version');
             expect(prompt).toContain('More authoritative version');
             expect(prompt).toContain('More storytelling version');
