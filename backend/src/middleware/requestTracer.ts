@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import logger, { asyncLocalStorage } from '../utils/logger';
 
 export const requestTracer = (req: Request, res: Response, next: NextFunction) => {
-    const requestId = req.header('x-request-id') || uuidv4();
+    const requestId = req.header('x-request-id') || randomUUID();
     req.headers['x-request-id'] = requestId;
     res.setHeader('x-request-id', requestId);
 

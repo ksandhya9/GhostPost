@@ -24,4 +24,4 @@ EXPOSE 5000
 # For development, we'll keep using npm run dev if that's the intention, 
 # but for production-ready dockerization, we typically use the built files.
 # Given the user's dev environment, we'll stick to 'npm run dev'.
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npx prisma db push --schema=./prisma/schema.prisma && npm run dev"]

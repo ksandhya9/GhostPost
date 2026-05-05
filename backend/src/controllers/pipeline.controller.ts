@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../db';
 import { asyncHandler } from '../utils/asyncHandler';
 import * as llmService from '../services/llm.service';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 export const getPipeline = asyncHandler(async (req: Request, res: Response) => {
     const topics = await (prisma as any).pipelineTopic.findMany({
@@ -69,7 +69,7 @@ export const generatePipelineTopic = asyncHandler(async (req: Request, res: Resp
         return res.status(404).json({ error: 'Topic not found' });
     }
 
-    const requestId = uuidv4();
+    const requestId = randomUUID();
     const toneMapping: Record<string, string> = {
         'professional': 'Professional',
         'conversational': 'Conversational',

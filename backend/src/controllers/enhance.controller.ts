@@ -4,7 +4,7 @@ import * as llmService from '../services/llm.service';
 import * as extractionService from '../services/extraction.service';
 import logger from '../utils/logger';
 import { statusService } from '../services/status.service';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import { determineIntent } from '../utils/intent.util';
 import { prisma } from '../db';
 
@@ -28,7 +28,7 @@ export const enhance = async (req: Request, res: Response) => {
         const isTopic = intent.isTopic;
         const deepResearch = parsedBody.deepResearch || intent.deepResearch;
 
-        const requestId = clientRequestId || uuidv4();
+        const requestId = clientRequestId || randomUUID();
 
         logger.info({ requestId, inputType, textLength: text.length, mode, targetPages, deepResearch, tone, isTopic }, 'Processing enhance request via Multi-Agent System');
 

@@ -1,4 +1,5 @@
 import { performance } from 'perf_hooks';
+import { randomUUID } from 'node:crypto';
 import logger from '../utils/logger';
 import { SecurityAgent } from './agents/security.agent';
 import { DraftingAgent } from './agents/drafting.agent';
@@ -24,7 +25,7 @@ export class AgentOrchestrator {
     constructor() {}
 
     public async runEnhancementPipeline(input: string, options: PromptOptions & { mode: 'article' | 'post'; researchTopic?: string; isTopic?: boolean; requestId?: string }): Promise<OrchestrationResult> {
-        const { mode, tone, targetPages = 2, researchTopic, isTopic, requestId = crypto.randomUUID() } = options;
+        const { mode, tone, targetPages = 2, researchTopic, isTopic, requestId = randomUUID() } = options;
         const trace: OrchestrationResult['trace'] = [];
 
         const securityAgent = new SecurityAgent(requestId);
