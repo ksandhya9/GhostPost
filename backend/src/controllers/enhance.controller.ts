@@ -6,6 +6,7 @@ import logger from '../utils/logger';
 import { statusService } from '../services/status.service';
 import { v4 as uuidv4 } from 'uuid';
 import { determineIntent } from '../utils/intent.util';
+import { prisma } from '../db';
 
 const enhanceSchema = z.object({
     inputType: z.enum(['text', 'article', 'topic']).default('text'),
@@ -175,7 +176,28 @@ export const generateGuidedVariations = async (req: Request, res: Response) => {
         if (error instanceof z.ZodError) {
             return res.status(400).json({ error: 'Validation error', details: error.issues });
         }
-        logger.error({ error }, 'Error generating guided variations');
+        res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+};
+
+export const startGuidedSession = async (req: Request, res: Response) => {
+    try {
+        const { intent } = z.object({ intent: z.string() }).parse(req.body);
+        
+        const session = await prisma.workflowSession.create({
+            data: {
+                intent,
+                currentStep: 1
+            }
+        });
+
+        logger.info({ sessionId: session.id, intent }, 'Initialized new guided workflow session');
+        res.status(201).json({ sessionId: session.id });
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: 'Validation error', details: error.issues });
+        }
+        logger.error({ error }, 'Failed to initialize guided workflow session');
         res.status(500).json({ error: error.message || 'Internal server error' });
     }
 };

@@ -82,3 +82,17 @@ model AgentLog {
   @@index([requestId])
   @@index([createdAt])
 }
+
+model WorkflowSession {
+  id                String   @id @default(uuid())
+  currentStep       Int      @default(1)
+  intent            String?
+  targetAudience    String?
+  messyIdea         String?  @db.Text
+  selectedHook      String?  @db.Text
+  selectedStructure String?
+  refinedPost       String?  @db.Text
+  variations        Json?    // Stores the 5 variants
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

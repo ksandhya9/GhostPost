@@ -9,5 +9,6 @@ router.post('/generate-hook', enhanceController.generateHook);
 router.post('/guided/structure', enhanceController.generateGuidedStructure);
 router.post('/guided/post', enhanceController.generateGuidedPost);
 router.post('/guided/variations', enhanceController.generateGuidedVariations);
+router.post('/guided/session', enhanceController.startGuidedSession);
 
 export default router;

@@ -16,28 +16,12 @@ import {
 import axios from 'axios';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { IntentSelector } from './IntentSelector';
+import { INTENT_OPTIONS, STEPS } from '../../config/workflow';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
-
-const STEPS = [
-    'Goal',
-    'Idea',
-    'Hook',
-    'Draft',
-    'Variants',
-    'Publish'
-];
-
-const INTENTS = [
-    { id: 'insight', label: 'Share a lesson', icon: BookOpen, description: 'Turn an experience into a teaching moment' },
-    { id: 'story', label: 'Tell a personal story', icon: MessageSquare, description: 'Connect with your audience through vulnerability' },
-    { id: 'authority', label: 'Build authority', icon: Award, description: 'Showcase your expertise and deep knowledge' },
-    { id: 'promote', label: 'Promote something', icon: Megaphone, description: 'A product, event, or newsletter launch' },
-    { id: 'discussion', label: 'Start a discussion', icon: Zap, description: 'Ask a hard question or share a hot take' },
-    { id: 'announce', label: 'Announce something', icon: Sparkles, description: 'Hiring, new role, or milestone' },
-];
 
 export default function GuidedWorkflow() {
     const [step, setStep] = useState(1);
@@ -46,11 +30,13 @@ export default function GuidedWorkflow() {
 
     // State for workflow data
     const [intent, setIntent] = useState('');
+    const [targetAudience, setTargetAudience] = useState('');
     const [messyIdea, setMessyIdea] = useState('');
     const [structureData, setStructureData] = useState<any>(null);
     const [selectedHook, setSelectedHook] = useState('');
     const [refinedPost, setRefinedPost] = useState('');
     const [variations, setVariations] = useState<any>(null);
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
     // Persist to local storage
     useEffect(() => {
@@ -58,14 +44,29 @@ export default function GuidedWorkflow() {
         if (saved) {
             const parsed = JSON.parse(saved);
             setIntent(parsed.intent || '');
+            setTargetAudience(parsed.targetAudience || '');
             setMessyIdea(parsed.messyIdea || '');
             setStep(parsed.step || 1);
+            setSessionId(parsed.sessionId || null);
         }
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('ghostpost_guided_state', JSON.stringify({ intent, messyIdea, step }));
-    }, [intent, messyIdea, step]);
+        localStorage.setItem('ghostpost_guided_state', JSON.stringify({ intent, targetAudience, messyIdea, step, sessionId }));
+    }, [intent, targetAudience, messyIdea, step, sessionId]);
+
+    const handleIntentSelect = async (label: string) => {
+        setIntent(label);
+        try {
+            const res = await axios.post('/api/enhance/guided/session', { intent: label });
+            setSessionId(res.data.sessionId);
+            nextStep();
+        } catch (error) {
+            console.error('Failed to initialize session:', error);
+            // Fallback: move to next step anyway if API fails, relying on localStorage
+            nextStep();
+        }
+    };
 
     const nextStep = () => setStep(prev => Math.min(prev + 1, 6));
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
@@ -73,7 +74,7 @@ export default function GuidedWorkflow() {
     const handleGenerateStructure = async () => {
         setLoading(true);
         try {
-            const res = await axios.post('/api/enhance/guided/structure', { intent, messyIdea });
+            const res = await axios.post('/api/enhance/guided/structure', { intent, messyIdea, targetAudience });
             setStructureData(res.data);
             nextStep();
         } catch (err) {
@@ -90,6 +91,7 @@ export default function GuidedWorkflow() {
             const res = await axios.post('/api/enhance/guided/post', {
                 intent,
                 messyIdea,
+                targetAudience,
                 selectedHook: hook,
                 selectedStructure: structureData.structure
             });
@@ -125,32 +127,10 @@ export default function GuidedWorkflow() {
         switch (step) {
             case 1:
                 return (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-6"
-                    >
-                        <div className="text-center">
-                            <h2 className="text-2xl font-bold text-[#b86b3e]">Choose your goal</h2>
-                            <p className="text-[#4a6b8c]/70">What is the primary purpose of this post?</p>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {INTENTS.map((i) => (
-                                <button
-                                    key={i.id}
-                                    onClick={() => { setIntent(i.label); nextStep(); }}
-                                    className={cn(
-                                        "flex flex-col items-start p-4 bg-white/5 border rounded-lg transition-all text-left group hover:border-[#b86b3e]/50 hover:bg-[#b86b3e]/5",
-                                        intent === i.label ? "border-[#b86b3e] bg-[#b86b3e]/10" : "border-[#4a6b8c]/20"
-                                    )}
-                                >
-                                    <i.icon size={24} className="mb-3 text-[#b86b3e]" />
-                                    <h3 className="font-semibold text-[#1a1a1a]">{i.label}</h3>
-                                    <p className="text-xs text-[#4a6b8c] mt-1">{i.description}</p>
-                                </button>
-                            ))}
-                        </div>
-                    </motion.div>
+                    <IntentSelector 
+                        selectedIntent={intent}
+                        onSelect={handleIntentSelect}
+                    />
                 );
             case 2:
                 return (
@@ -163,12 +143,28 @@ export default function GuidedWorkflow() {
                             <h2 className="text-2xl font-bold text-[#b86b3e]">Dump the messy idea</h2>
                             <p className="text-[#4a6b8c]/70">Don't worry about quality yet. Just get your thoughts out.</p>
                         </div>
-                        <textarea
-                            value={messyIdea}
-                            onChange={(e) => setMessyIdea(e.target.value)}
-                            placeholder="Dump your messy thoughts here. Half-baked is welcome..."
-                            className="w-full h-64 p-4 bg-white/40 border border-[#4a6b8c]/20 rounded-lg focus:outline-none focus:border-[#b86b3e]/50 transition-all text-[#1a1a1a] resize-none"
-                        />
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[var(--text-xs)] uppercase tracking-widest text-[#4a6b8c] font-bold mb-2 block">Who is this for?</label>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    value={targetAudience}
+                                    onChange={(e) => setTargetAudience(e.target.value)}
+                                    placeholder="e.g., Solo founders, Senior Engineers, Marketing Managers..."
+                                    className="w-full p-3 bg-white/40 border border-[#4a6b8c]/20 rounded-lg focus:outline-none focus:border-[#b86b3e]/50 transition-all text-[#1a1a1a]"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[var(--text-xs)] uppercase tracking-widest text-[#4a6b8c] font-bold mb-2 block">Dump the messy idea</label>
+                                <textarea
+                                    value={messyIdea}
+                                    onChange={(e) => setMessyIdea(e.target.value)}
+                                    placeholder="Don't worry about quality yet. Just get your thoughts out. Half-baked is welcome..."
+                                    className="w-full h-48 p-4 bg-white/40 border border-[#4a6b8c]/20 rounded-lg focus:outline-none focus:border-[#b86b3e]/50 transition-all text-[#1a1a1a] resize-none"
+                                />
+                            </div>
+                        </div>
                         <div className="flex justify-between items-center">
                             <button onClick={prevStep} className="flex items-center gap-2 text-[#4a6b8c] hover:text-[#b86b3e] transition-all">
                                 <ChevronLeft size={18} /> Back
